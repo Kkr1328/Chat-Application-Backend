@@ -1,9 +1,13 @@
 const mongoose = require("mongoose");
 
 const MessageSchema = new mongoose.Schema({
+  chat_id: {
+    type: mongoose.Types.ObjectId,
+    require: true,
+  },
   message: {
     type: String,
-    required: true,
+    require: true,
   },
   liked_users: {
     type: Array(mongoose.Schema.ObjectId),

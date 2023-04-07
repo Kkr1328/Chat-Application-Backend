@@ -1,19 +1,19 @@
 // import
-const uuidv4 = require("uuid").v4;
 const GroupChat = require("../models/GroupChat");
 
 const groups = new Set();
 
-async function createMongoGroup(roomName) {
-  await GroupChat.create({ name: roomName });
+async function createMongoGroup(groupName) {
+  await GroupChat.create({ name: groupName });
 }
 
 async function getMongoGroups() {
   return await GroupChat.find({});
 }
 
-async function getMongoGroupID(roomName) {
-  return await GroupChat.find({ name: roomName })[0]._id;
+async function getMongoGroupID(groupName) {
+  const selectedGroup = await GroupChat.find({ name: groupName });
+  return selectedGroup[0]._id;
 }
 
 class GroupChatRoom {
@@ -22,27 +22,20 @@ class GroupChatRoom {
     this.io = io;
 
     getMongoGroups().then((prevGroups) => {
-      prevGroups.forEach((group) => {
-        if (
-          !groups.has(
-            JSON.stringify({
-              id: group._id,
-              name: group.name,
-            })
-          )
-        ) {
-          groups.add(
-            JSON.stringify({
-              id: group._id,
-              name: group.name,
-            })
-          );
+      prevGroups.forEach((prevGroup) => {
+        const group = JSON.stringify({
+          id: prevGroup._id,
+          name: prevGroup.name,
+        });
+
+        if (!groups.has(group)) {
+          groups.add(group);
         }
       });
     });
 
     socket.on("getGroups", () => this.getGroups());
-    socket.on("group", (roomName) => this.createGroup(roomName));
+    socket.on("group", (groupName) => this.createGroup(groupName));
   }
 
   sendGroup(group) {
@@ -54,27 +47,19 @@ class GroupChatRoom {
     groups.forEach((group) => this.sendGroup(group));
   }
 
-  createGroup(roomName) {
-    const group = JSON.stringify({
-      id: uuidv4(),
-      name: roomName,
-    });
+  createGroup(groupName) {
+    createMongoGroup(groupName).then(() =>
+      getMongoGroupID(groupName).then((groupID) => {
+        const group = JSON.stringify({
+          id: groupID,
+          name: groupName,
+        });
 
-    createMongoGroup(roomName);
-
-    getMongoGroupID(roomName).then((id) => console.log(id));
-
-    groups.add(group);
-    this.sendGroup(group);
+        groups.add(group);
+        this.sendGroup(group);
+      })
+    );
   }
 }
 
-function room(io) {
-  io.on("connection", (socket) => {
-    console.log("a user connects room");
-
-    new GroupChatRoom(io, socket);
-  });
-}
-
-module.exports = room;
+module.exports = GroupChatRoom;
