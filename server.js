@@ -1,41 +1,36 @@
 // import
-const express = require("express");
-const mongoose = require("mongoose");
-const http = require("http");
-const cors = require("cors");
-const socketio = require("socket.io");
-const MessageService = require("./utilities/MessageSocketService");
-const GroupChatService = require("./utilities/GroupChatSocketService");
 require("dotenv").config();
-
-const connectDB = async () => {
-  mongoose.set("strictQuery", true);
-  const conn = await mongoose.connect(process.env.MONGO_URI);
-
-  console.log(`MongoDB Connected : ${conn.connection.host}`);
-};
+const express = require("express");
+const cors = require("cors");
+const mongoose = require("mongoose");
+const app = express();
+const PORT = process.env.PORT || 9000;
+app.use(express.json());
+app.use(cors());
+const connectDB = require("./config/dbConn");
 
 connectDB();
+mongoose.connection.once("open", () => {
+  server.listen(PORT, () => {
+    console.log("🔗 Successfully Connected to MongoDB");
+    console.log(`✅ Application running on port: ${PORT}`);
+  });
+});
+mongoose.connection.on("error", (err) => {
+  console.log(err);
+});
 
-const app = express();
-app.use(cors());
-
-const PORT = process.env.PORT || 9000;
+const http = require("http");
+const socketio = require("socket.io");
 const server = http.createServer(app);
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
 const io = socketio(server, {
+  transports: ["websocket", "polling"],
+  maxHttpBufferSize: 1e8,
+  pingTimeout: 60000,
   cors: {
     origin: "*",
     methods: ["GET", "POST"],
   },
-  transports: ["websocket"],
   allowEIO3: true,
 });
-
-io.on("connection", (socket) => {
-  console.log("a user connects ");
-
-  new MessageService(io, socket);
-  new GroupChatService(io, socket);
-});
+require("./utilities/AuthSocketService")(io);
