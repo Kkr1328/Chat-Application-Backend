@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const DirectChatSchema = new mongoose.Schema({
   memebers: {
-    type: Set(mongoose.Schema.ObjectId),
+    type: Set(mongoose.Types.ObjectId),
   },
   background_image: {
     type: String,

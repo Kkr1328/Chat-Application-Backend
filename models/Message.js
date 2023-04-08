@@ -10,7 +10,7 @@ const MessageSchema = new mongoose.Schema({
     require: true,
   },
   liked_users: {
-    type: Array(mongoose.Schema.ObjectId),
+    type: Array(mongoose.Types.ObjectId),
     default: [],
   },
   like: {

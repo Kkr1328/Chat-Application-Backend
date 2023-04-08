@@ -4,8 +4,8 @@ const mongoose = require("mongoose");
 const http = require("http");
 const cors = require("cors");
 const socketio = require("socket.io");
-const Connection = require("./utilities/chat");
-const GroupChatRoom = require("./utilities/room");
+const MessageService = require("./utilities/MessageSocketService");
+const GroupChatService = require("./utilities/GroupChatSocketService");
 require("dotenv").config();
 
 const connectDB = async () => {
@@ -36,6 +36,6 @@ const io = socketio(server, {
 io.on("connection", (socket) => {
   console.log("a user connects ");
 
-  new Connection(io, socket);
-  new GroupChatRoom(io, socket);
+  new MessageService(io, socket);
+  new GroupChatService(io, socket);
 });
