@@ -15,8 +15,14 @@ async function getMongoGroupByName(groupName) {
   return selectedGroup[0];
 }
 
+async function updateMongoGroupBackground({ groupName, backgroungUrl }) {
+  await GroupChat.findOneAndUpdate({ name: groupName }, { background_image: backgroungUrl });
+  return;
+}
+
 module.exports = {
   createMongoGroupChat,
   getMongoGroupChats,
   getMongoGroupByName,
+  updateMongoGroupBackground,
 };
