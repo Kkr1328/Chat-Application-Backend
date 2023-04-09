@@ -2,10 +2,7 @@ const User = require("../models/User");
 
 async function existMongoUserHavingUsername(username) {
   const users = await User.find({ username: username });
-  if (users.length > 0) {
-    return true;
-  }
-  return false;
+  return users.length > 0;
 }
 
 async function createMongoUser({ username, password }) {
@@ -52,7 +49,6 @@ module.exports = {
   existMongoUserHavingUsername,
   createMongoUser,
   existMongoUser,
-
   getMongoUsers,
   getMongoUserById,
   updateMongoUserById,
