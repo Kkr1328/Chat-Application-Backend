@@ -12,8 +12,7 @@ const connectDB = require("./config/dbConn");
 connectDB();
 mongoose.connection.once("open", () => {
   server.listen(PORT, () => {
-    console.log("🔗 Successfully Connected to MongoDB");
-    console.log(`✅ Application running on port: ${PORT}`);
+    console.log(`Connected to MongoDB on port: ${PORT}`);
   });
 });
 mongoose.connection.on("error", (err) => {
@@ -33,4 +32,12 @@ const io = socketio(server, {
   },
   allowEIO3: true,
 });
-require("./utilities/AuthSocketService")(io);
+
+const MessageService = require("./utilities/MessageSocketService");
+const GroupChatService = require("./utilities/GroupChatSocketService");
+const UserService = require("./utilities/UserSocketService");
+io.on("connection", (socket) => {
+  new MessageService(io, socket);
+  new GroupChatService(io, socket);
+  new UserService(io, socket);
+});
