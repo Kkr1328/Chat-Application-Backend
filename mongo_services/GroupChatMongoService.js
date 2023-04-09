@@ -20,9 +20,15 @@ async function updateMongoGroupBackground({ groupName, backgroungUrl }) {
   return;
 }
 
+async function existMongoGroupHavingGroupName(groupName) {
+  const groups = await GroupChat.find({ name: groupName });
+  return groups.length > 0;
+}
+
 module.exports = {
   createMongoGroupChat,
   getMongoGroupChats,
   getMongoGroupByName,
   updateMongoGroupBackground,
+  existMongoGroupHavingGroupName,
 };
