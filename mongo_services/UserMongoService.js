@@ -5,6 +5,11 @@ async function existMongoUserHavingUsername(username) {
   return users.length > 0;
 }
 
+async function existMongoUserById(userId) {
+  const users = await User.findById(userId);
+  return users;
+}
+
 async function createMongoUser({ username, password }) {
   await User.create({
     username: username,
@@ -47,6 +52,7 @@ async function updateMongoUserById({ user_id, username, profile_image }) {
 
 module.exports = {
   existMongoUserHavingUsername,
+  existMongoUserById,
   createMongoUser,
   existMongoUser,
   getMongoUsers,
