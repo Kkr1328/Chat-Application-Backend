@@ -1,8 +1,13 @@
 const mongoose = require("mongoose");
 
 const DirectChatSchema = new mongoose.Schema({
-  memebers: {
-    type: Set(mongoose.Types.ObjectId),
+  first_member: {
+    type: mongoose.Types.ObjectId,
+    require: true,
+  },
+  second_member: {
+    type: mongoose.Types.ObjectId,
+    require: true,
   },
   background_image: {
     type: String,
