@@ -7,14 +7,14 @@ const CHAT_TYPE = {
 };
 
 async function existMongoChatHavingChatId(indentifier) {
-  const { type, chat_id } = indentifier;
+  const { type, chatId } = indentifier;
   var chats;
   if (type === CHAT_TYPE.DIRECT) {
-    chats = await DirectChat.findById(chat_id);
+    chats = await DirectChat.findById(chatId);
   } else if (type === CHAT_TYPE.GROUP) {
-    chats = await GroupChat.findById(chat_id);
+    chats = await GroupChat.findById(chatId);
   }
-  return chats.length > 0;
+  return chats;
 }
 
 async function updateMongoChatBackgroundImageByChatId(updateInfo) {
