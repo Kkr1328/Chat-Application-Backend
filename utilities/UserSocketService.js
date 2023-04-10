@@ -6,6 +6,7 @@ const {
   getMongoUsers,
   updateMongoUserById,
 } = require("../mongo_services/UserMongoService");
+const { createDirectChats } = require("../mongo_services/DirectChatMongoService");
 
 class UserService {
   constructor(io, socket) {
@@ -90,7 +91,7 @@ class UserService {
       }
 
       // valid username & password and create user
-      createMongoUser(auth);
+      createMongoUser(auth).then((newUser) => createDirectChats(newUser._id));
       this.socket.emit("register_response", { message: "Success" });
     });
   }
