@@ -11,11 +11,11 @@ async function existMongoUserById(userId) {
 }
 
 async function createMongoUser({ username, password }) {
-  await User.create({
+  const new_user = await User.create({
     username: username,
     password: password,
   });
-  return;
+  return new_user;
 }
 
 async function existMongoUser(auth) {
@@ -33,7 +33,48 @@ async function existMongoUser(auth) {
 }
 
 async function getMongoUsers(userId) {
-  const users = await User.find({ _id: { $ne: userId } }).select({ username: 1, profile_image: 1 });
+  const user = await User.findById(userId);
+  const first_users = await User.aggregate([
+    { $match: { _id: { $ne: user._id } } },
+    {
+      $lookup: {
+        from: "directchats",
+        localField: "_id",
+        foreignField: "first_member",
+        as: "chat",
+      },
+    },
+    { $unwind: "$chat" },
+    {
+      $project: {
+        _id: 1,
+        username: 1,
+        profile_image: 1,
+        chat_id: "$chat._id",
+      },
+    },
+  ]);
+  const second_users = await User.aggregate([
+    { $match: { _id: { $ne: user._id } } },
+    {
+      $lookup: {
+        from: "directchats",
+        localField: "_id",
+        foreignField: "second_member",
+        as: "chat",
+      },
+    },
+    { $unwind: "$chat" },
+    {
+      $project: {
+        _id: 1,
+        username: 1,
+        profile_image: 1,
+        chat_id: "$chat._id",
+      },
+    },
+  ]);
+  const users = first_users.concat(second_users);
   return users;
 }
 
