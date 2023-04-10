@@ -1,35 +1,77 @@
 const Message = require("../models/Message");
 const GroupChat = require("../models/GroupChat");
+const User = require("../models/User");
+const DirectChat = require("../models/DirectChat");
 
-async function createMongoMessage({ chatId, message }) {
-  const group = await GroupChat.findById(chatId);
+const CHAT_TYPE = {
+  DIRECT: "Direct",
+  GROUP: "Group",
+};
+
+async function createMongoMessage(messageInfo) {
+  const { type, message } = messageInfo;
+  var chat;
+  if (type === CHAT_TYPE.DIRECT) {
+    chat = await DirectChat.findById(message.chat_id);
+  } else if (type === CHAT_TYPE.GROUP) {
+    chat = await GroupChat.findById(message.chat_id);
+  }
+  const user = await User.findById(message.user_id);
+
   await Message.create({
-    chat_id: group._id,
-    message: message,
+    _id: message._id,
+    user_id: user._id,
+    chat_id: chat._id,
+    message: message.message,
+    liked_users: [],
+    like: 0,
+    created_at: message.created_at,
   });
   return;
 }
 
-async function getMongoMessages(chatId) {
-  const messages = await Message.find({ chat_id: chatId });
+async function getMongoMessages({ type, chatId }) {
+  var chat;
+  if (type === CHAT_TYPE.DIRECT) {
+    chat = await DirectChat.findById(chatId);
+  } else if (type === CHAT_TYPE.GROUP) {
+    chat = await GroupChat.findById(chatId);
+  }
+
+  const messages = await Message.aggregate([
+    { $match: { chat_id: chat._id } },
+    {
+      $lookup: {
+        from: "users",
+        localField: "user_id",
+        foreignField: "_id",
+        as: "user",
+      },
+    },
+    { $unwind: "$user" },
+    {
+      $project: {
+        _id: 1,
+        user_id: 1,
+        username: "$user.username",
+        chat_id: 1,
+        message: 1,
+        liked_users: 1,
+        like: 1,
+        created_at: 1,
+      },
+    },
+  ]);
+  console.log(messages);
   return messages;
 }
 
-async function getMongoMessageByIdentifiers({ chatId, message }) {
-  const group = await GroupChat.findById(chatId);
-  const selected_messages = await Message.find({
-    chat_id: group._id,
-    message: message,
-  });
-  return selected_messages[0];
-}
-
-async function likeMongoMessageByIdentifiers({ userId, chatId, message }) {
-  await GroupChat.findOneAndUpdate(
-    { user_id: userId, chat_id: chatId, message: message },
+async function likeMongoMessageByIdentifiers({ ownerId, messageId }) {
+  await Message.findOneAndUpdate(
+    { _id: messageId },
     {
       $push: {
-        liked_users: { user_id: userId },
+        liked_users: { user_id: ownerId },
       },
       like: {
         $inc: 1,
@@ -39,12 +81,12 @@ async function likeMongoMessageByIdentifiers({ userId, chatId, message }) {
   return;
 }
 
-async function unlikeMongoMessageByIdentifiers({ userId, chatId, message }) {
-  await GroupChat.findOneAndUpdate(
-    { user_id: userId, chat_id: chatId, message: message },
+async function unlikeMongoMessageByIdentifiers({ ownerId, messageId }) {
+  await Message.findOneAndUpdate(
+    { _id: messageId },
     {
       $pull: {
-        liked_users: { user_id: userId },
+        liked_users: { user_id: ownerId },
       },
       like: {
         $dec: 1,
@@ -57,7 +99,6 @@ async function unlikeMongoMessageByIdentifiers({ userId, chatId, message }) {
 module.exports = {
   createMongoMessage,
   getMongoMessages,
-  getMongoMessageByIdentifiers,
   likeMongoMessageByIdentifiers,
   unlikeMongoMessageByIdentifiers,
 };
