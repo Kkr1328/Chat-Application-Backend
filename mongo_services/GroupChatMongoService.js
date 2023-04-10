@@ -25,10 +25,16 @@ async function existMongoGroupHavingGroupName(groupName) {
   return groups.length > 0;
 }
 
+async function existMongoGroupChatById(groupId) {
+  const groups = await Group.findById(groupId);
+  return groups.length > 0;
+}
+
 module.exports = {
   createMongoGroupChat,
   getMongoGroupChats,
   getMongoGroupByName,
   updateMongoGroupBackground,
   existMongoGroupHavingGroupName,
+  existMongoGroupChatById,
 };
