@@ -3,6 +3,7 @@ const {
   getMongoGroupChats,
   getMongoGroupByName,
   existMongoGroupHavingGroupName,
+  getMongoGroupByChatId,
 } = require("../mongo_services/GroupChatMongoService");
 
 const {
@@ -20,6 +21,12 @@ class GroupChatService {
     // socket.on("group", userListener);
     // socket.on("get_groups_response", (res: any) => console.log(res.message));
     // socket.emit("getGroups");
+
+    socket.on("getGroupById", (chatId) => this.getGroupById(chatId));
+    // client site
+    // socket.on("group", userListener);
+    // socket.on("get_group_by_id_response", (res: any) => console.log(res.message));
+    // socket.emit("getGroupById", chatId);
 
     socket.on("createGroup", (groupName) => this.createGroup(groupName));
     // client site
@@ -42,8 +49,20 @@ class GroupChatService {
     });
   }
 
+  getGroupById(chatId) {
+    this.socket.emit("get_group_by_id_response", { message: "Success" });
+    getMongoGroupByChatId(chatId).then((group) => {
+      this.sendGroup(group);
+    });
+  }
+
   sendGroup(group) {
-    this.io.sockets.emit("group", group);
+    const new_group = {
+      _id: group._id,
+      name: group.name,
+      backgroundImage: group.background_image,
+    };
+    this.io.sockets.emit("group", new_group);
   }
 
   createGroup(groupName) {
