@@ -21,7 +21,7 @@ class MessageService {
     // socket.on("get_messages_response", (res: any) => console.log(res.message));
     // socket.emit("getMessages", identifier);
 
-    // message information = type ["Direct", "Group"] + ownerId + ownerName + chatId + message
+    // message information = type ["Direct", "Group"] + ownerId + ownerName + ownerProfileImage + chatId + message
     socket.on("createMessage", (messageInfo) => this.createMessage(messageInfo));
     // client site
     // socket.emit("createMessage", messageInfo);
@@ -42,14 +42,15 @@ class MessageService {
   sendMessage(ownerId, message) {
     const obj_message = JSON.parse(message);
     const isOwner = obj_message.user_id === ownerId;
-    const isLike = obj_message.liked_users.includes(ownerId);
+    const isLiked = obj_message.liked_users.includes(ownerId);
     const new_message = {
       _id: obj_message._id,
       message: obj_message.message,
       userId: obj_message.user_id,
       username: obj_message.username,
+      profileImage: obj_message.profile_image,
       isOwner: isOwner,
-      isLike: isLike,
+      isLiked: isLiked,
       like: obj_message.like,
       createdAt: obj_message.created_at,
     };
@@ -60,37 +61,38 @@ class MessageService {
   getMessages(identifier) {
     const { type, ownerId, chatId } = identifier;
 
-    existMongoUserById(ownerId).then((userResult) => {
-      if (userResult) {
-        existMongoChatHavingChatId({ type, chatId }).then((chatResult) => {
-          if (chatResult) {
-            getMongoMessages({ type, chatId }).then((prevMessages) => {
-              prevMessages.forEach((prevMessage) => {
-                this.sendMessage(ownerId, JSON.stringify(prevMessage));
-              });
-            });
-          } else {
-            this.socket.emit("get_messages_response", {
-              message: "Chat id is invalid",
-            });
-          }
-        });
-      } else {
-        this.socket.emit("get_messages_response", {
-          message: "Your user id is invalid",
-        });
-      }
+    // existMongoUserById(ownerId).then((userResult) => {
+    //   if (userResult) {
+    //     existMongoChatHavingChatId({ type, chatId }).then((chatResult) => {
+    //       if (chatResult) {
+    getMongoMessages({ type, chatId }).then((prevMessages) => {
+      prevMessages.forEach((prevMessage) => {
+        this.sendMessage(ownerId, JSON.stringify(prevMessage));
+      });
     });
+    //       } else {
+    //         this.socket.emit("get_messages_response", {
+    //           message: "Chat id is invalid",
+    //         });
+    //       }
+    //     });
+    //   } else {
+    //     this.socket.emit("get_messages_response", {
+    //       message: "Your user id is invalid",
+    //     });
+    //   }
+    // });
   }
 
   createMessage(messageInfo) {
-    const { type, ownerId, ownerName, chatId, message } = messageInfo;
+    const { type, ownerId, ownerName, ownerProfileImage, chatId, message } = messageInfo;
 
     const new_id = new mongoose.Types.ObjectId();
     const new_message = {
       _id: new_id,
       user_id: ownerId,
       username: ownerName,
+      profile_image: ownerProfileImage,
       chat_id: chatId,
       message: message,
       liked_users: [],
