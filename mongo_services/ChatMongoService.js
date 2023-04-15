@@ -6,8 +6,8 @@ const CHAT_TYPE = {
   GROUP: "Group",
 };
 
-async function existMongoChatHavingChatId(indentifier) {
-  const { type, chatId } = indentifier;
+async function existMongoChatHavingChatId(identifier) {
+  const { type, chatId } = identifier;
   var chats;
   if (type === CHAT_TYPE.DIRECT) {
     chats = await DirectChat.findById(chatId);
