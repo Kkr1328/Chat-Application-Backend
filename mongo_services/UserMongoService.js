@@ -1,3 +1,4 @@
+const DirectChat = require("../models/DirectChat");
 const User = require("../models/User");
 
 async function existMongoUserHavingUsername(username) {
@@ -26,6 +27,7 @@ async function existMongoUser(auth) {
     return {
       success: true,
       user_id: user._id,
+      profile_image: user.profile_image,
     };
   } else {
     return { success: false };
@@ -83,6 +85,14 @@ async function getMongoUserById(userId) {
   return user;
 }
 
+async function getMongoUserByChatId(ids) {
+  const { myUserId, chatId } = ids;
+  const chat = await DirectChat.findById(chatId);
+  const userId = chat.first_member.toString() === myUserId ? chat.second_member : chat.first_member;
+  const user = await User.findOne({ _id: userId });
+  return user;
+}
+
 async function updateMongoUserById({ user_id, username, profile_image }) {
   await User.findOneAndUpdate(
     { _id: user_id },
@@ -97,6 +107,7 @@ module.exports = {
   createMongoUser,
   existMongoUser,
   getMongoUsers,
+  getMongoUserByChatId,
   getMongoUserById,
   updateMongoUserById,
 };
