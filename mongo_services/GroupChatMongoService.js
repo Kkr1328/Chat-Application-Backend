@@ -10,6 +10,11 @@ async function getMongoGroupChats() {
   return groupChats;
 }
 
+async function getMongoGroupByChatId(chatId) {
+  const groupChat = await GroupChat.findById(chatId);
+  return groupChat;
+}
+
 async function getMongoGroupByName(groupName) {
   const selectedGroup = await GroupChat.find({ name: groupName });
   return selectedGroup[0];
@@ -33,6 +38,7 @@ async function existMongoGroupChatById(groupId) {
 module.exports = {
   createMongoGroupChat,
   getMongoGroupChats,
+  getMongoGroupByChatId,
   getMongoGroupByName,
   updateMongoGroupBackground,
   existMongoGroupHavingGroupName,
