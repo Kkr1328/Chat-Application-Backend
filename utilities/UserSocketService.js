@@ -2,6 +2,7 @@ const {
   existMongoUserHavingUsername,
   createMongoUser,
   existMongoUser,
+  getMongoUserByChatId,
   getMongoUserById,
   getMongoUsers,
   updateMongoUserById,
@@ -31,6 +32,17 @@ class UserService {
     // socket.on("user", userListener);
     // socket.on("get_users_response", (res: any) => console.log(res.message));
     // socket.emit("getUsers", myUserId);
+
+    // ids = myUserId + chatId
+    socket.on("getUserByChatId", (ids) => this.getUserByChatId(ids));
+    // client site
+    // socket.on("get_user_by_chat_id_response", (res: any) => console.log(res.message));
+    // socket.emit("getUserByChatId", ids);
+
+    socket.on("getUserById", (userId) => this.getUserById(userId));
+    // client site
+    // socket.on("get_user_by_id_response", (res: any) => console.log(res.message));
+    // socket.emit("getUserById", userId);
 
     socket.on("getMe", (myUserId) => this.getMe(myUserId));
     // client site
@@ -101,7 +113,11 @@ class UserService {
       // check having username
       console.log(result);
       if (result.success) {
-        this.socket.emit("login_response", { message: "Success", userId: result.user_id });
+        this.socket.emit("login_response", {
+          message: "Success",
+          userId: result.user_id,
+          profileImage: result.profile_image,
+        });
         return;
       }
 
@@ -127,7 +143,47 @@ class UserService {
   }
 
   sendUser(user) {
-    this.io.sockets.emit("user", user);
+    const new_user = {
+      _id: user._id,
+      username: user.username,
+      profileImage: user.profile_image,
+      chatId: user.chat_id,
+    };
+    this.io.sockets.emit("user", new_user);
+  }
+
+  getUserById(userId) {
+    getMongoUserById(userId).then((user) => {
+      if (user) {
+        this.socket.emit("get_user_by_id_response", {
+          message: "Success",
+          username: user.username,
+          profileImage: user.profile_image,
+        });
+      } else {
+        // cant find the user id
+        this.socket.emit("get_user_by_id_response", { message: "The user id is invalid" });
+      }
+    });
+  }
+
+  getUserByChatId(ids) {
+    const { myUserId, chatId } = ids;
+    // getMongoUserById(myUserId).then((me) => {
+    //   if (me) {
+    getMongoUserByChatId(ids).then((user) => {
+      this.socket.emit("get_user_by_chat_id_response", {
+        message: "Success",
+        username: user.username,
+        userId: user._id,
+        profileImage: user.profile_image,
+      });
+    });
+    //   } else {
+    //     // cant find the user id
+    //     this.socket.emit("get_user_by_chat_id_response", { message: "Your user id is invalid" });
+    //   }
+    // });
   }
 
   getMe(myUserId) {
