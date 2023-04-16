@@ -36,47 +36,44 @@ async function existMongoUser(auth) {
 
 async function getMongoUsers(userId) {
   const user = await User.findById(userId);
-  const first_users = await User.aggregate([
-    { $match: { _id: { $ne: user._id } } },
+  const users = await DirectChat.aggregate([
     {
       $lookup: {
-        from: "directchats",
-        localField: "_id",
-        foreignField: "first_member",
-        as: "chat",
+        from: "users",
+        let: {
+          first_member: "$first_member",
+          second_member: "$second_member",
+        },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  {
+                    $or: [
+                      { $eq: [user._id, "$$first_member"] },
+                      { $eq: [user._id, "$$second_member"] },
+                    ],
+                  },
+                  { $ne: ["$_id", user._id] },
+                ],
+              },
+            },
+          },
+        ],
+        as: "user",
       },
     },
-    { $unwind: "$chat" },
+    { $unwind: "$user" },
     {
       $project: {
-        _id: 1,
-        username: 1,
-        profile_image: 1,
-        chat_id: "$chat._id",
+        _id: "$user._id",
+        username: "$user.username",
+        profile_image: "$user.profile_image",
+        chat_id: "$_id",
       },
     },
   ]);
-  const second_users = await User.aggregate([
-    { $match: { _id: { $ne: user._id } } },
-    {
-      $lookup: {
-        from: "directchats",
-        localField: "_id",
-        foreignField: "second_member",
-        as: "chat",
-      },
-    },
-    { $unwind: "$chat" },
-    {
-      $project: {
-        _id: 1,
-        username: 1,
-        profile_image: 1,
-        chat_id: "$chat._id",
-      },
-    },
-  ]);
-  const users = first_users.concat(second_users);
   return users;
 }
 

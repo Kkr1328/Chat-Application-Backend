@@ -16,42 +16,33 @@ class UserService {
 
     // auth = username + password
     socket.on("register", (auth) => this.register(auth));
-    // client site
     // socket.on("register_response", (res: any) => console.log(res.message));
     // socket.emit("register", { username: username, password: password });
-    // if (message === "Success") go on else struck
 
     socket.on("login", (auth) => this.login(auth));
-    // client site
     // socket.on("login_response", (res: any) => console.log(res.message));
     // socket.emit("login", { username: username, password: password });
-    // if (message === "Success") go on else struck
 
     socket.on("getUsers", (myUserId) => this.getUsers(myUserId));
-    // client site
     // socket.on("user", userListener);
     // socket.on("get_users_response", (res: any) => console.log(res.message));
     // socket.emit("getUsers", myUserId);
 
     // ids = myUserId + chatId
     socket.on("getUserByChatId", (ids) => this.getUserByChatId(ids));
-    // client site
     // socket.on("get_user_by_chat_id_response", (res: any) => console.log(res.message));
     // socket.emit("getUserByChatId", ids);
 
     socket.on("getUserById", (userId) => this.getUserById(userId));
-    // client site
     // socket.on("get_user_by_id_response", (res: any) => console.log(res.message));
     // socket.emit("getUserById", userId);
 
     socket.on("getMe", (myUserId) => this.getMe(myUserId));
-    // client site
     // socket.on("get_me_response", (res: any) => console.log(res.message));
     // socket.emit("getMe", myUserId);
 
     //update information = my user id + new username + new user profile image
     socket.on("updateMe", (updateInfo) => this.updateMe(updateInfo));
-    // client site
     // socket.on("update_user_response", (res: any) => console.log(res.message));
     // socket.emit("updateMe", {
     //   myUserId: myUserId,
