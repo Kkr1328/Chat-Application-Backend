@@ -1,8 +1,10 @@
 const {
   createMongoMessage,
   getMongoMessages,
+  getMongoMessageById,
   likeMongoMessageByIdentifiers,
   unlikeMongoMessageByIdentifiers,
+  updateLikeMongoMessageByIndentifier,
 } = require("../mongo_services/MessageMongoService");
 const { existMongoUserById } = require("../mongo_services/UserMongoService");
 const { existMongoChatHavingChatId } = require("../mongo_services/ChatMongoService");
@@ -16,27 +18,18 @@ class MessageService {
 
     // identifier = type ["Direct", "Group"] + ownerId + chatId
     socket.on("getMessages", (identifier) => this.getMessages(identifier));
-    // client site
     // socket.on("message", messageListener);
     // socket.on("get_messages_response", (res: any) => console.log(res.message));
     // socket.emit("getMessages", identifier);
 
     // message information = type ["Direct", "Group"] + ownerId + ownerName + ownerProfileImage + chatId + message
     socket.on("createMessage", (messageInfo) => this.createMessage(messageInfo));
-    // client site
     // socket.emit("createMessage", messageInfo);
 
     // identifier = ownerId + messageId
     socket.on("likeMessage", (identifier) => this.likeMessage(identifier));
-    // client site
     // socket.on("like_message_response", (res: any) => console.log(res.message));
     // socket.emit("likeMessage", identifier);
-
-    // identifier = ownerId + messageId
-    socket.on("unlikeMessage", (identifier) => this.unlikeMessage(identifier));
-    // client site
-    // socket.on("unlike_message_response", (res: any) => console.log(res.message));
-    // socket.emit("unlikeMessage", identifier);
   }
 
   sendMessage(ownerId, message) {
@@ -105,12 +98,31 @@ class MessageService {
 
   likeMessage(identifier) {
     const { ownerId, messageId } = identifier;
-    likeMongoMessageByIdentifiers({ ownerId, messageId });
-  }
+    getMongoMessageById(messageId).then((message) => {
+      var new_liked_users;
+      var new_like;
+      if (!message.liked_users.includes(ownerId)) {
+        new_liked_users = [...message.liked_users, ownerId];
+        new_like = new_liked_users.length;
+      } else {
+        new_liked_users = message.liked_users.filter((id) => id !== ownerId);
+        new_like = new_liked_users.length;
+      }
 
-  unlikeMessage(identifier) {
-    const { ownerId, messageId } = identifier;
-    unlikeMongoMessageByIdentifiers({ ownerId, messageId });
+      const new_message = {
+        _id: message._id,
+        user_id: message.user_id,
+        chat_id: message.chat_id,
+        message: message.message,
+        liked_users: new_liked_users,
+        like: new_like,
+        created_at: message.created_at,
+      };
+      console.log(new_message);
+      this.sendMessage(ownerId, JSON.stringify(new_message));
+
+      updateLikeMongoMessageByIndentifier({ messageId, new_liked_users, new_like });
+    });
   }
 }
 

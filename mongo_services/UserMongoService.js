@@ -91,6 +91,7 @@ async function getMongoUserByChatId(ids) {
 }
 
 async function updateMongoUserById({ user_id, username, profile_image }) {
+  console.log({ user_id, username, profile_image });
   await User.findOneAndUpdate(
     { _id: user_id },
     { username: username, profile_image: profile_image }

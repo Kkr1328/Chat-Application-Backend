@@ -66,6 +66,11 @@ async function getMongoMessages({ type, chatId }) {
   return messages;
 }
 
+async function getMongoMessageById(messageId) {
+  const message = await Message.findById(messageId);
+  return message;
+}
+
 async function likeMongoMessageByIdentifiers({ ownerId, messageId }) {
   await Message.findOneAndUpdate(
     { _id: messageId },
@@ -96,9 +101,21 @@ async function unlikeMongoMessageByIdentifiers({ ownerId, messageId }) {
   return;
 }
 
+async function updateLikeMongoMessageByIndentifier({ messageId, new_liked_users, new_like }) {
+  await Message.findOneAndUpdate(
+    { _id: messageId },
+    {
+      liked_users: new_liked_users,
+      like: new_like,
+    }
+  );
+}
+
 module.exports = {
   createMongoMessage,
   getMongoMessages,
+  getMongoMessageById,
   likeMongoMessageByIdentifiers,
   unlikeMongoMessageByIdentifiers,
+  updateLikeMongoMessageByIndentifier,
 };

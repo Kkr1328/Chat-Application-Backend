@@ -19,7 +19,7 @@ const MessageSchema = new mongoose.Schema(
       require: true,
     },
     liked_users: {
-      type: Array(mongoose.Types.ObjectId),
+      type: Array(String),
       default: [],
     },
     like: {
