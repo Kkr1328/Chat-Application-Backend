@@ -73,7 +73,7 @@ class UserService {
 
       // check having username
       if (result) {
-        this.socket.emit("register_response", "Username already in use");
+        this.socket.emit("register_response", { message: "Username already in use" });
         return;
       }
 
