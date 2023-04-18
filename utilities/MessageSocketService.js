@@ -62,6 +62,7 @@ class MessageService {
       prevMessages.forEach((prevMessage) => {
         this.sendMessage(ownerId, JSON.stringify(prevMessage));
       });
+      this.socket.emit("get_messages_response", { message: "Success" });
     });
     //       } else {
     //         this.socket.emit("get_messages_response", {
