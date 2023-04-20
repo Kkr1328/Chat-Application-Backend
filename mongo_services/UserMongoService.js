@@ -36,41 +36,46 @@ async function existMongoUser(auth) {
 
 async function getMongoUsers(userId) {
   const user = await User.findById(userId);
-  const users = await DirectChat.aggregate([
+  const users = await User.aggregate([
+    { $match: { _id: { $ne: user._id } } },
     {
       $lookup: {
-        from: "users",
+        from: "directchats",
         let: {
-          first_member: "$first_member",
-          second_member: "$second_member",
+          user_id: "$_id",
         },
         pipeline: [
           {
             $match: {
               $expr: {
-                $and: [
+                $or: [
                   {
-                    $or: [
-                      { $eq: [user._id, "$$first_member"] },
-                      { $eq: [user._id, "$$second_member"] },
+                    $and: [
+                      { $eq: [user._id, "$first_member"] },
+                      { $eq: ["$$user_id", "$second_member"] },
                     ],
                   },
-                  { $ne: ["$_id", user._id] },
+                  {
+                    $and: [
+                      { $eq: [user._id, "$second_member"] },
+                      { $eq: ["$$user_id", "$first_member"] },
+                    ],
+                  },
                 ],
               },
             },
           },
         ],
-        as: "user",
+        as: "chat",
       },
     },
-    { $unwind: "$user" },
+    { $unwind: "$chat" },
     {
       $project: {
-        _id: "$user._id",
-        username: "$user.username",
-        profile_image: "$user.profile_image",
-        chat_id: "$_id",
+        _id: 1,
+        username: 1,
+        profile_image: 1,
+        chat_id: "$chat._id",
       },
     },
   ]);
