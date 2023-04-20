@@ -25,7 +25,21 @@ async function getMongoDirectByChatId(ids) {
   };
 }
 
+async function getMongoDirectByUserId(ids) {
+  const { myUserId, userId } = ids;
+
+  const chat = await DirectChat.findOne({
+    $or: [
+      { first_member: userId, second_member: myUserId },
+      { first_member: myUserId, second_member: userId },
+    ],
+  });
+  console.log(chat);
+  return chat;
+}
+
 module.exports = {
   createDirectChats,
   getMongoDirectByChatId,
+  getMongoDirectByUserId,
 };

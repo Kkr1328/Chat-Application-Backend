@@ -6,7 +6,10 @@ const {
   getMongoGroupByChatId,
 } = require("../mongo_services/GroupChatMongoService");
 
-const { getMongoDirectByChatId } = require("../mongo_services/DirectChatMongoService");
+const {
+  getMongoDirectByChatId,
+  getMongoDirectByUserId,
+} = require("../mongo_services/DirectChatMongoService");
 
 const {
   existMongoChatHavingChatId,
@@ -45,6 +48,11 @@ class GroupChatService {
     socket.on("getDirectByChatId", (ids) => this.getDirectByChatId(ids));
     // socket.on("get_direct_by_chat_id_response", (res: any) => console.log(res.message));
     // socket.emit("getDirectByChatId", ids);
+
+    // ids = myUserId + userId
+    socket.on("getDirectByUserId", (ids) => this.getDirectByUserId(ids));
+    // socket.on("get_direct_by_user_id_response", (res: any) => console.log(res.message));
+    // socket.emit("getDirectByUserId", ids);
   }
 
   getGroups() {
@@ -132,6 +140,15 @@ class GroupChatService {
         userId: user._id,
         profileImage: user.profile_image,
         backgroundImage: user.background_image,
+      });
+    });
+  }
+
+  getDirectByUserId(ids) {
+    getMongoDirectByUserId(ids).then((chat) => {
+      this.socket.emit("get_direct_by_user_id_response", {
+        message: "Success",
+        chatId: chat ? chat._id : "",
       });
     });
   }
