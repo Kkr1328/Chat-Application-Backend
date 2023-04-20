@@ -53,29 +53,12 @@ class MessageService {
 
   getMessages(identifier) {
     const { type, ownerId, chatId } = identifier;
-
-    // existMongoUserById(ownerId).then((userResult) => {
-    //   if (userResult) {
-    //     existMongoChatHavingChatId({ type, chatId }).then((chatResult) => {
-    //       if (chatResult) {
     getMongoMessages({ type, chatId }).then((prevMessages) => {
       prevMessages.forEach((prevMessage) => {
         this.sendMessage(ownerId, JSON.stringify(prevMessage));
       });
       this.socket.emit("get_messages_response", { message: "Success" });
     });
-    //       } else {
-    //         this.socket.emit("get_messages_response", {
-    //           message: "Chat id is invalid",
-    //         });
-    //       }
-    //     });
-    //   } else {
-    //     this.socket.emit("get_messages_response", {
-    //       message: "Your user id is invalid",
-    //     });
-    //   }
-    // });
   }
 
   createMessage(messageInfo) {
@@ -113,6 +96,8 @@ class MessageService {
       const new_message = {
         _id: message._id,
         user_id: message.user_id,
+        username: message.username,
+        profile_image: message.profile_image,
         chat_id: message.chat_id,
         message: message.message,
         liked_users: new_liked_users,

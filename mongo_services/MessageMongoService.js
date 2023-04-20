@@ -68,7 +68,18 @@ async function getMongoMessages({ type, chatId }) {
 
 async function getMongoMessageById(messageId) {
   const message = await Message.findById(messageId);
-  return message;
+  const user = await User.findById(message.user_id);
+  return {
+    _id: message._id,
+    user_id: user._id,
+    username: user.username,
+    profile_image: user.profile_image,
+    chat_id: message.chat_id,
+    message: message.message,
+    liked_users: message.liked_users,
+    like: message.like,
+    created_at: message.created_at,
+  };
 }
 
 async function likeMongoMessageByIdentifiers({ ownerId, messageId }) {
