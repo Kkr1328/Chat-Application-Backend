@@ -194,30 +194,41 @@ class UserService {
 
   updateMe(updateInfo) {
     const { myUserId, username, profileImage } = updateInfo;
-    getMongoUserById(myUserId).then((me) => {
-      if (me) {
-        // check at least username length
-        if (username.length < 1) {
-          this.socket.emit("update_user_response", {
-            message: "Username should be at least 1 character",
-          });
-          return;
-        }
-
-        // check at most username length
-        if (username.length > 20) {
-          this.socket.emit("update_user_response", {
-            message: "Username should be at most 20 characters",
-          });
-          return;
-        }
-
-        // valid userId & username and update user
-        updateMongoUserById({ user_id: myUserId, username: username, profile_image: profileImage });
-        this.socket.emit("update_user_response", { message: "Success" });
+    existMongoUserHavingUsername(username).then((result) => {
+      if (result) {
+        this.socket.emit("update_user_response", { message: "Username already in use" });
+        return;
       } else {
-        // cant find the user id
-        this.socket.emit("update_user_response", { message: "Your user id is invalid" });
+        getMongoUserById(myUserId).then((me) => {
+          if (me) {
+            // check at least username length
+            if (username.length < 1) {
+              this.socket.emit("update_user_response", {
+                message: "Username should be at least 1 character",
+              });
+              return;
+            }
+
+            // check at most username length
+            if (username.length > 20) {
+              this.socket.emit("update_user_response", {
+                message: "Username should be at most 20 characters",
+              });
+              return;
+            }
+
+            // valid userId & username and update user
+            updateMongoUserById({
+              user_id: myUserId,
+              username: username,
+              profile_image: profileImage,
+            });
+            this.socket.emit("update_user_response", { message: "Success" });
+          } else {
+            // cant find the user id
+            this.socket.emit("update_user_response", { message: "Your user id is invalid" });
+          }
+        });
       }
     });
   }
