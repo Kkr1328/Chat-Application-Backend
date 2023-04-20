@@ -2,14 +2,9 @@ const {
   createMongoMessage,
   getMongoMessages,
   getMongoMessageById,
-  likeMongoMessageByIdentifiers,
-  unlikeMongoMessageByIdentifiers,
   updateLikeMongoMessageByIndentifier,
 } = require("../mongo_services/MessageMongoService");
-const { existMongoUserById } = require("../mongo_services/UserMongoService");
-const { existMongoChatHavingChatId } = require("../mongo_services/ChatMongoService");
 const { default: mongoose } = require("mongoose");
-const uuidv4 = require("uuid").v4;
 
 class MessageService {
   constructor(io, socket) {
