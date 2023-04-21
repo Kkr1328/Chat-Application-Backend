@@ -100,7 +100,7 @@ class GroupChatService {
 
       // check having username
       if (result) {
-        this.socket.emit("create_group_response", "GroupName already in use");
+        this.socket.emit("create_group_response", { message: "GroupName already in use" });
         return;
       }
 
