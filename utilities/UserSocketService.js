@@ -123,7 +123,7 @@ class UserService {
         this.socket.emit("get_users_response", { message: "Success" });
         getMongoUsers(myUserId).then((users) => {
           users.forEach((user) => {
-            this.sendUser({ newUser: user, myUserId: myUserId });
+            this.sendUser({ user: user, myUserId: myUserId });
           });
         });
         return;
@@ -134,9 +134,11 @@ class UserService {
     });
   }
 
-  sendUser(user) {
+  sendUser(userInfo) {
+    const { user, myUserId } = userInfo;
     const new_user = {
       _id: user._id,
+      myUserId: myUserId,
       username: user.username,
       profileImage: user.profile_image,
       chatId: user.chat_id,
