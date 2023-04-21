@@ -135,6 +135,7 @@ class GroupChatService {
   getDirectByChatId(ids) {
     getMongoDirectByChatId(ids).then((user) => {
       this.socket.emit("get_direct_by_chat_id_response", {
+        chatId: ids.chatId,
         message: "Success",
         username: user.username,
         userId: user._id,
