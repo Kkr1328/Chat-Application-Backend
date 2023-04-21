@@ -37,6 +37,7 @@ class MessageService {
       userId: obj_message.user_id,
       username: obj_message.username,
       profileImage: obj_message.profile_image,
+      chatId: obj_message.chat_id,
       isOwner: isOwner,
       isLiked: isLiked,
       like: obj_message.like,
