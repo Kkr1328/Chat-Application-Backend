@@ -108,6 +108,7 @@ class UserService {
           message: "Success",
           userId: result.user_id,
           profileImage: result.profile_image,
+          username: auth.username,
         });
         return;
       }
@@ -122,7 +123,7 @@ class UserService {
         this.socket.emit("get_users_response", { message: "Success" });
         getMongoUsers(myUserId).then((users) => {
           users.forEach((user) => {
-            this.sendUser(user);
+            this.sendUser({ newUser: user, myUserId: myUserId });
           });
         });
         return;
