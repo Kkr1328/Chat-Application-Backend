@@ -1,8 +1,9 @@
 const DirectChat = require("../models/DirectChat");
 const User = require("../models/User");
 
-async function existMongoUserHavingUsername(username) {
-  const users = await User.find({ username: username });
+async function existMongoUserHavingUsername(userInfo) {
+  const { user_id, username } = userInfo;
+  const users = await User.find({ _id: { $ne: user_id }, username: username });
   return users.length > 0;
 }
 

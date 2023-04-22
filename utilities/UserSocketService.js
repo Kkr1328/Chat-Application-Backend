@@ -197,7 +197,7 @@ class UserService {
 
   updateMe(updateInfo) {
     const { myUserId, username, profileImage } = updateInfo;
-    existMongoUserHavingUsername(username).then((result) => {
+    existMongoUserHavingUsername({ user_id: myUserId, username: username }).then((result) => {
       if (result) {
         this.socket.emit("update_user_response", { message: "Username already in use" });
         return;
