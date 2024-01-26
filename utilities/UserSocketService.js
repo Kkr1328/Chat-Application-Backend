@@ -14,6 +14,8 @@ class UserService {
     this.io = io;
     this.socket = socket;
 
+    socket.on("test", (res: any) => console.log(res.message));
+
     // auth = username + password
     socket.on("register", (auth) => this.register(auth));
     // socket.on("register_response", (res: any) => console.log(res.message));
